@@ -5,6 +5,14 @@ from matches.bip import create_random_weighted_dibipartite
 from matches.algs import match_by_flow, match_by_forward_greedy
 
 
+def sum_of_weight(G, M):
+    R = 0
+    for e in M:
+        R = R + G.edges[e]['weight']
+
+    return R
+
+
 @pytest.fixture
 def G_1vs2():
     n1 = 2  
@@ -55,18 +63,16 @@ def G_end_big():
 
 def test_forward_greedy(G_end_big):
     M = match_by_forward_greedy(G_end_big)
-    R = 0
-    for e in M:
-        R = R + G_end_big.edges[e]['weight']
-
+    R = sum_of_weight(G_end_big, M)
     assert R == -4 + -6
 
 
 def test_flow(G_1vs2):
     M = match_by_flow(G_1vs2, 0.1)
-    R = 0
-    for e in M:
-        R = R + G_1vs2.edges[e]['weight']
-
+    R = sum_of_weight(G_1vs2, M)
     assert R == -4
+
+    M = match_by_flow(G_1vs2, 0.3) # so h=1
+    R = sum_of_weight(G_1vs2, M)
+    assert R == -3
 

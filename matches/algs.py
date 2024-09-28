@@ -10,6 +10,15 @@ def is_sorted(l):
 
 
 ##### Algorithms #####
+def match_by_global_greedy(G):
+    ijw = [(i, j, d['weight']) for i, j, d in G.edges(data=True)]
+    my_list.sort(key=operator.itemgetter(1))
+    while(len(ijw) > 0):
+        i, j, w = min(ijw, key=itemgetter(2))
+        pass
+    pass
+
+
 def match_by_forward_greedy(G):
     V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
     V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
@@ -28,8 +37,17 @@ def match_by_forward_greedy(G):
     return M
 
 
-def match_by_flow(G, q):
+def match_by_flow(G, q, C=1e5):
+    '''
+    C is a scale factor to convert and truncate factional weights
+    '''
     h = math.floor(np.log(0.5) / np.log(1-q))
+
+    G = G.copy() # as we need to modify G
+
+    # multiply edge weights by a position factor 
+    for i, j, d in G.edges(data=True):
+        G.edges[i,j]['weight'] = math.floor(d['weight'] * (1-q)**(j+1) * C)
 
     # add source and target
     V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
@@ -48,7 +66,7 @@ def match_by_flow(G, q):
     G.add_edge("t0", "t", weight=0, capacity=h)
 
     #flowDict = nx.min_cost_flow(G)
-    flowDict = nx.max_flow_min_cost(G, 's', 't')
+    flowDict = nx.max_flow_min_cost(G, 's', 't') # doesn't work with fractional weights
     # print(f"mincost = {nx.cost_of_flow(G, flowDict)}")
 
     M = []
