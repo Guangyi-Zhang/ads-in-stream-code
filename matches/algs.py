@@ -13,7 +13,25 @@ def is_sorted(l):
 
 ##### Algorithms #####
 def match_by_online_greedy(G, q, thr):
-    pass
+    V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
+    V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
+    assert is_sorted(V2)
+
+    M = []
+    i_taken = set()
+    for j in V2:
+        iw = [(i, d['weight']) for i, _, d in G.in_edges(nbunch=j, data=True) if i not in i_taken]
+        if len(iw) == 0:
+            continue
+        i_star, w_star = min(iw, key=itemgetter(1))
+
+        if -w_star * (1-q)**(j+1) < -thr:
+            continue
+
+        i_taken.add(i_star)
+        M.append((i_star, j))
+    
+    return M
 
 
 def match_by_global_greedy(G, q):

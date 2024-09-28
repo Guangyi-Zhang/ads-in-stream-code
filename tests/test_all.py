@@ -56,6 +56,24 @@ def edges_end_big():
     return edges_with_w
 
 
+def test_online_greedy(edges_end_big, G_empty):
+    q = 0.1
+    G = create_dibipartite(edges_end_big, q)
+
+    M = match_by_online_greedy(G, q, thr=-1)
+    R = sum_of_weight(G, M)
+    assert R == -4 # M = [(10, 0), (11, 1)]
+
+    M = match_by_online_greedy(G, q, thr=-2)
+    R = sum_of_weight(G, M)
+    assert R == -3 # M = [(10, 1)] 
+
+    M = match_by_online_greedy(G, q, thr=-3)
+    R = sum_of_weight(G, M)
+    assert R == -100 # M = [(10, 9)] 
+
+
+
 def test_global_greedy(edges_1vs2, edges_end_big, G_empty):
     q = 0.1
     G = create_dibipartite(edges_1vs2, q)
