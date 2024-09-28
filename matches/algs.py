@@ -15,7 +15,7 @@ def is_sorted(l):
 def match_by_global_greedy(G, q):
     h = []
     for i, j, d in G.edges(data=True):
-        heappush(h, (d['weight'], (i,j,0)))
+        heappush(h, (d['biased_w'], (i,j,0)))
 
     M = []
     i_taken = set()
