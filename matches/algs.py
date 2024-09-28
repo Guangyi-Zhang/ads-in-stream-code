@@ -2,6 +2,8 @@ import numpy as np
 import networkx as nx
 import math
 from operator import itemgetter
+from heapq import heappush, heappop
+import bisect 
 
 
 ##### Utilities #####
@@ -10,13 +12,34 @@ def is_sorted(l):
 
 
 ##### Algorithms #####
-def match_by_global_greedy(G):
-    ijw = [(i, j, d['weight']) for i, j, d in G.edges(data=True)]
-    my_list.sort(key=operator.itemgetter(1))
-    while(len(ijw) > 0):
-        i, j, w = min(ijw, key=itemgetter(2))
-        pass
-    pass
+def match_by_global_greedy(G, q):
+    h = []
+    for i, j, d in G.edges(data=True):
+        heappush(h, (d['weight'], (i,j,0)))
+
+    M = []
+    i_taken = set()
+    j_taken = set()
+    j_taken_sorted = []
+
+    # update edge weights in a lazy greedy fashion
+    while(len(h) > 0):
+        w, (i, j, nj) = heappop(h)
+
+        if j in j_taken or i in i_taken:
+            continue
+
+        nj_smaller = bisect.bisect_left(j_taken_sorted, j)
+        if nj == nj_smaller:
+            M.append((i, j))
+            i_taken.add(i)
+            j_taken.add(j)
+            bisect.insort(j_taken_sorted, j) 
+        else:
+            w_new = math.floor(w * (1-q) ** (nj_smaller - nj))
+            heappush(h, (w_new, (i,j,nj_smaller)))
+
+    return M
 
 
 def match_by_forward_greedy(G):

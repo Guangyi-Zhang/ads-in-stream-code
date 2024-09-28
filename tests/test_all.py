@@ -2,7 +2,7 @@ import pytest
 import networkx as nx
 
 from matches.bip import create_dibipartite, create_random_weighted_dibipartite
-from matches.algs import match_by_flow, match_by_forward_greedy
+from matches.algs import match_by_flow, match_by_forward_greedy, match_by_global_greedy
 
 
 def sum_of_weight(G, M):
@@ -50,6 +50,19 @@ def edges_end_big():
     ]
 
     return edges_with_w
+
+
+def test_global_greedy(edges_1vs2, edges_end_big, G_empty):
+    q = 0.1
+    G = create_dibipartite(edges_1vs2, q)
+    M = match_by_global_greedy(G, q)
+    R = sum_of_weight(G, M)
+    assert R == -3
+
+    G = create_dibipartite(edges_end_big, q)
+    M = match_by_global_greedy(G, q)
+    R = sum_of_weight(G, M)
+    assert R == -2 + -7 + -100
 
 
 def test_forward_greedy(edges_end_big, G_empty):
