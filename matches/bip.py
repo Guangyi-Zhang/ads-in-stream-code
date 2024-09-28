@@ -9,17 +9,17 @@ def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C
     '''
 
     # Create sets of nodes
-    top_nodes = set(range(n1))
-    bottom_nodes = set(range(n1, n1 + n2))
+    top_nodes = set(range(n2)) # easier if top for j's
+    bottom_nodes = set(range(n2, n1 + n2))
     
     # Create the graph
     G = nx.DiGraph()
-    G.add_nodes_from(top_nodes, bipartite=0)
-    G.add_nodes_from(bottom_nodes, bipartite=1)
+    G.add_nodes_from(top_nodes, bipartite=1)
+    G.add_nodes_from(bottom_nodes, bipartite=0)
     
     # Add edges with random weights
-    for i in top_nodes:
-        for j in bottom_nodes:
+    for j in top_nodes:
+        for i in bottom_nodes:
             if random.random() < p:
                 #weight = random.uniform(*weight_range)
                 weight = random.randint(*weight_range)
@@ -36,13 +36,13 @@ def create_dibipartite(edges_with_w, q, C=1e5):
     '''
 
     # Create sets of nodes
-    top_nodes = set([i for i,j,w in edges_with_w])
-    bottom_nodes = set([j for i,j,w in edges_with_w])
+    top_nodes = set([j for i,j,w in edges_with_w])
+    bottom_nodes = set([i for i,j,w in edges_with_w])
     
     # Create the graph
     G = nx.DiGraph()
-    G.add_nodes_from(top_nodes, bipartite=0)
-    G.add_nodes_from(bottom_nodes, bipartite=1)
+    G.add_nodes_from(top_nodes, bipartite=1)
+    G.add_nodes_from(bottom_nodes, bipartite=0)
     
     # Add edges with random weights
     for i,j,w in edges_with_w:

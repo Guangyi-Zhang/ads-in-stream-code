@@ -1,8 +1,12 @@
 import pytest
 import networkx as nx
 
-from matches.bip import create_dibipartite, create_random_weighted_dibipartite
-from matches.algs import match_by_flow, match_by_forward_greedy, match_by_global_greedy
+from matches.bip import create_dibipartite, \
+                        create_random_weighted_dibipartite
+from matches.algs import match_by_flow, \
+                         match_by_forward_greedy, \
+                         match_by_global_greedy, \
+                         match_by_online_greedy
 
 
 def sum_of_weight(G, M):
@@ -22,9 +26,9 @@ def G_empty():
 @pytest.fixture
 def edges_1vs2():
     edges_with_w = [
-        (0, 2, 2),
-        (1, 3, 2),
-        (0, 3, 3),
+        (2, 0, 2),
+        (3, 1, 2),
+        (2, 1, 3),
     ]
 
     return edges_with_w
@@ -33,20 +37,20 @@ def edges_1vs2():
 @pytest.fixture
 def edges_end_big():
     edges_with_w = [
-        (0, 10, 2),
-        (1, 11, 2),
-        (0, 11, 3),
+        (10, 0, 2),
+        (11, 1, 2),
+        (10, 1, 3),
 
-        (2, 12, 1),
-        (3, 13, 1),
-        (4, 14, 1),
-        (5, 15, 1),
-        (6, 16, 1),
-        (7, 17, 1),
-        (8, 18, 1),
-        (9, 19, 1),
+        (12, 2, 1),
+        (13, 3, 1),
+        (14, 4, 1),
+        (15, 5, 1),
+        (16, 6, 1),
+        (17, 7, 1),
+        (18, 8, 1),
+        (19, 9, 1),
 
-        (0, 19, 100),
+        (10, 9, 100),
     ]
 
     return edges_with_w

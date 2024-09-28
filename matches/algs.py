@@ -12,6 +12,10 @@ def is_sorted(l):
 
 
 ##### Algorithms #####
+def match_by_online_greedy(G, q, thr):
+    pass
+
+
 def match_by_global_greedy(G, q):
     h = []
     for i, j, d in G.edges(data=True):
