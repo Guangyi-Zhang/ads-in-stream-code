@@ -1,7 +1,7 @@
 import pytest
 import networkx as nx
 
-from matches.bip import create_random_weighted_dibipartite
+from matches.bip import create_dibipartite, create_random_weighted_dibipartite
 from matches.algs import match_by_flow, match_by_forward_greedy
 
 
@@ -14,65 +14,64 @@ def sum_of_weight(G, M):
 
 
 @pytest.fixture
-def G_1vs2():
-    n1 = 2  
-    n2 = 2  
-
-    top_nodes = set(range(n1))
-    bottom_nodes = set(range(n1, n1 + n2))
-
-    G = nx.DiGraph()
-    G.add_nodes_from(top_nodes, bipartite=0)
-    G.add_nodes_from(bottom_nodes, bipartite=1)
-    
-    G.add_edge(0, 2, weight=-2, capacity=1)
-    G.add_edge(1, 3, weight=-2, capacity=1)
-    G.add_edge(0, 3, weight=-3, capacity=1)
-
-    return G
+def G_empty():
+    # small p
+    return create_random_weighted_dibipartite(10, 10, q=0.1, p=0.1)
 
 
 @pytest.fixture
-def G_end_big():
-    n1 = 10
-    n2 = 10
+def edges_1vs2():
+    edges_with_w = [
+        (0, 2, 2),
+        (1, 3, 2),
+        (0, 3, 3),
+    ]
 
-    top_nodes = set(range(n1))
-    bottom_nodes = set(range(n1, n1 + n2))
-
-    G = nx.DiGraph()
-    G.add_nodes_from(top_nodes, bipartite=0)
-    G.add_nodes_from(bottom_nodes, bipartite=1)
-    
-    G.add_edge(0, 10, weight=-2, capacity=1)
-    G.add_edge(1, 11, weight=-2, capacity=1)
-    G.add_edge(0, 11, weight=-3, capacity=1)
-
-    G.add_edge(2, 12, weight=-1, capacity=1)
-    G.add_edge(3, 13, weight=-1, capacity=1)
-    G.add_edge(4, 14, weight=-1, capacity=1)
-    G.add_edge(5, 15, weight=-1, capacity=1)
-    G.add_edge(6, 16, weight=-1, capacity=1)
-    G.add_edge(7, 17, weight=-1, capacity=1)
-    #G.add_edge(8, 18, weight=-1, capacity=1)
-
-    G.add_edge(0, 19, weight=-100, capacity=1)
-
-    return G
+    return edges_with_w
 
 
-def test_forward_greedy(G_end_big):
-    M = match_by_forward_greedy(G_end_big)
-    R = sum_of_weight(G_end_big, M)
-    assert R == -4 + -6
+@pytest.fixture
+def edges_end_big():
+    edges_with_w = [
+        (0, 10, 2),
+        (1, 11, 2),
+        (0, 11, 3),
+
+        (2, 12, 1),
+        (3, 13, 1),
+        (4, 14, 1),
+        (5, 15, 1),
+        (6, 16, 1),
+        (7, 17, 1),
+        (8, 18, 1),
+        (9, 19, 1),
+
+        (0, 19, 100),
+    ]
+
+    return edges_with_w
 
 
-def test_flow(G_1vs2):
-    M = match_by_flow(G_1vs2, 0.1)
-    R = sum_of_weight(G_1vs2, M)
+def test_forward_greedy(edges_end_big, G_empty):
+    q = 0.1
+    G = create_dibipartite(edges_end_big, q)
+    M = match_by_forward_greedy(G)
+    R = sum_of_weight(G, M)
+    assert R == -4 + -8
+
+    M = match_by_forward_greedy(G_empty)
+
+
+def test_flow(edges_1vs2):
+    q = 0.1
+    G = create_dibipartite(edges_1vs2, q)
+    M = match_by_flow(G, q)
+    R = sum_of_weight(G, M)
     assert R == -4
 
-    M = match_by_flow(G_1vs2, 0.3) # so h=1
-    R = sum_of_weight(G_1vs2, M)
+    q = 0.3 # so h=1
+    G = create_dibipartite(edges_1vs2, q)
+    M = match_by_flow(G, q)
+    R = sum_of_weight(G, M)
     assert R == -3
 
