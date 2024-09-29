@@ -188,6 +188,15 @@ def match_by_forward_greedy(G):
     return M
 
 
+def match_by_mwm(G):
+    V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
+    Mdict = nx.bipartite.minimum_weight_full_matching(G, top_nodes=V1, weight='biased_w')
+
+    M = [(v, Mdict[v]) for v in V1 if v in Mdict]
+
+    return M
+
+
 def match_by_flow(G, q):
     h = math.floor(np.log(0.5) / np.log(1-q))
 

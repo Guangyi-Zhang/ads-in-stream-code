@@ -3,7 +3,7 @@ import random
 import math
 
 
-def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C=1e5):
+def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C=1e5, directed=True):
     '''
     C is a scale factor to convert and truncate factional weights
     '''
@@ -13,7 +13,7 @@ def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C
     bottom_nodes = set(range(n2, n1 + n2))
     
     # Create the graph
-    G = nx.DiGraph()
+    G = nx.DiGraph() if directed else nx.Graph()
     G.add_nodes_from(top_nodes, bipartite=1)
     G.add_nodes_from(bottom_nodes, bipartite=0)
     
@@ -30,7 +30,7 @@ def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C
     return G
 
 
-def create_dibipartite(edges_with_w, q, C=1e5):
+def create_dibipartite(edges_with_w, q, C=1e5, directed=True):
     '''
     C is a scale factor to convert and truncate factional weights
     '''
@@ -40,7 +40,7 @@ def create_dibipartite(edges_with_w, q, C=1e5):
     bottom_nodes = set([i for i,j,w in edges_with_w])
     
     # Create the graph
-    G = nx.DiGraph()
+    G = nx.DiGraph() if directed else nx.Graph()
     G.add_nodes_from(top_nodes, bipartite=1)
     G.add_nodes_from(bottom_nodes, bipartite=0)
     

@@ -9,6 +9,7 @@ from matches.algs import match_by_flow, \
                          match_by_online_greedy, \
                          match_by_backward_greedy, \
                          match_by_backward_oblivious_greedy, \
+                         match_by_mwm, \
                          revenue, eq
 
 
@@ -149,6 +150,14 @@ def test_forward_greedy(edges_end_big, G_empty):
     assert R == -4 + -8
 
     M = match_by_forward_greedy(G_empty)
+
+
+def test_mwm(edges_1vs2):
+    q = 0.1
+    G = create_dibipartite(edges_1vs2, q, directed=False)
+    M = match_by_mwm(G)
+    R = sum_of_weight(G, M)
+    assert R == -4
 
 
 def test_flow(edges_1vs2):
