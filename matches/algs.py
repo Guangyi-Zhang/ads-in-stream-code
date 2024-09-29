@@ -4,14 +4,81 @@ import math
 from operator import itemgetter
 from heapq import heappush, heappop
 import bisect 
+from collections import defaultdict
+from sortedcontainers import SortedList
 
 
 ##### Utilities #####
+def eq(a, b):
+    return abs(a-b) < 1e-6
+
+
 def is_sorted(l):  
     return all(l[i] <= l[i+1] for i in range(len(l) - 1))
 
 
+def revenue(G, M, q, jth=-1):
+    R = 0
+    nj = 0
+    for i,j in sorted(M, key=itemgetter(1)): # sorted by j
+        R = R + -G.edges[i,j]['weight'] * (1-q) ** (j - jth + nj)
+        nj = nj + 1
+    
+    return R
+
+
 ##### Algorithms #####
+# Checcklist: negative weight, j starts from 0, remove asserts
+
+def match_by_backward_greedy(G, q):
+    pass
+
+
+def match_by_backward_oblivious_greedy(G, q):
+    V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
+    V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
+    assert is_sorted(V2)
+
+    M = set()
+    R = 0
+    lastgain = defaultdict(float)
+    lastj = dict()
+    j_taken_sorted = SortedList()
+
+    for j in reversed(V2):
+        diffj = lambda i: (1-q) ** (lastj[i]-j if i in lastj else 0)
+        iw = [(i, -d['weight'] - lastgain[i] * diffj(i)) for i, _, d in G.in_edges(nbunch=j, data=True)]
+        if len(iw) == 0:
+            continue
+        i_star, wg_star = max(iw, key=itemgetter(1))
+
+        if wg_star <= q * R:
+            R = (1-q) * R
+            continue
+
+        w = -G.edges[i_star, j]['weight']
+        M.add((i_star, j))
+        lastgain[i_star] = w - q * R
+        if i_star in lastj:
+            M.remove((i_star, lastj[i_star]))
+
+            nj_smaller = j_taken_sorted.bisect_left(lastj[i_star])
+            j_taken_sorted.remove(lastj[i_star])
+
+            offset = -G.edges[i_star, lastj[i_star]]['weight'] * (1-q) ** (lastj[i_star] - j + 1 + nj_smaller)
+            R = (1-q) * R + w - offset
+            assert(wg_star < w - offset)
+            assert(eq(R, revenue(G, M, q, jth=j)))
+        else:
+            R = (1-q) * R + w
+            assert(eq(R, revenue(G, M, q, jth=j)))
+        R = (1-q) * R
+        lastj[i_star] = j
+        j_taken_sorted.add(j) 
+    
+    return list(M)
+
+
 def match_by_online_greedy(G, q, thr):
     V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
     V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
@@ -58,7 +125,7 @@ def match_by_global_greedy(G, q):
             j_taken.add(j)
             bisect.insort(j_taken_sorted, j) 
         else:
-            w_new = math.floor(w * (1-q) ** (nj_smaller - nj))
+            w_new = w * (1-q) ** (nj_smaller - nj)
             heappush(h, (w_new, (i,j,nj_smaller)))
 
     return M
