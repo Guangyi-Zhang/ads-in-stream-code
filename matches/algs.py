@@ -1,5 +1,6 @@
 import numpy as np
 import networkx as nx
+from scipy.optimize import linear_sum_assignment
 import math
 from operator import itemgetter
 from heapq import heappush, heappop
@@ -189,10 +190,24 @@ def match_by_forward_greedy(G):
 
 
 def match_by_mwm(G):
-    V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
-    Mdict = nx.bipartite.minimum_weight_full_matching(G, top_nodes=V1, weight='biased_w')
+    '''
+    nx.bipartite.minimum_weight_full_matching and linear_sum_assignment in scipy do not work.
+    use a general matching instead.
+    '''
+    edges = [(i,j,-d['weight']) for i,j,d in G.edges(data=True)]
+    G_ = nx.Graph()
+    G_.add_weighted_edges_from(edges) # remake a graph with non-neg weights
 
-    M = [(v, Mdict[v]) for v in V1 if v in Mdict]
+    M = nx.max_weight_matching(G_)
+    M = [(i,j) if j<i else (j,i) for i,j in M] # re-orient
+
+    #mat = nx.to_numpy_array(G, weight='biased_w')
+    #row_ind, col_ind = linear_sum_assignment(mat)
+    #print(f"rows={row_ind}, cols={col_ind}, cost = {mat[row_ind, col_ind].sum()}")
+    
+    #V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
+    #Mdict = nx.bipartite.minimum_weight_full_matching(G, top_nodes=V1, weight='biased_w')
+    #M = [(v, Mdict[v]) for v in V1 if v in Mdict]
 
     return M
 

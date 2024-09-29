@@ -154,10 +154,21 @@ def test_forward_greedy(edges_end_big, G_empty):
 
 def test_mwm(edges_1vs2):
     q = 0.1
-    G = create_dibipartite(edges_1vs2, q, directed=False)
+
+    G = create_dibipartite(edges_1vs2, q)
     M = match_by_mwm(G)
     R = sum_of_weight(G, M)
     assert R == -4
+
+    edges_with_w = [
+        (2, 0, 2),
+        (3, 1, 2),
+        (2, 1, 10),
+    ]
+    G = create_dibipartite(edges_with_w, q)
+    M = match_by_mwm(G)
+    R = sum_of_weight(G, M)
+    assert R == -10
 
 
 def test_flow(edges_1vs2):
