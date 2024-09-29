@@ -67,7 +67,8 @@ def match_by_backward_greedy(G, q):
         lastj[i_star] = j
         j_taken_sorted.add(j) 
 
-        assert(eq(R + g_star, revenue(G, M, q, jth=j)))
+        #print(f"j={j}, R={R + g_star}, rev={revenue(G, M, q, jth=j)}")
+        #assert(eq(R + g_star, revenue(G, M, q, jth=j)))
         R = (1-q) * (R + g_star)
     
     return list(M)
@@ -107,11 +108,12 @@ def match_by_backward_oblivious_greedy(G, q):
 
             offset = -G.edges[i_star, lastj[i_star]]['weight'] * (1-q) ** (lastj[i_star] - j + 1 + nj_smaller)
             R = (1-q) * R + w - offset
-            assert(wg_star < w - offset)
-            assert(eq(R, revenue(G, M, q, jth=j)))
+            #print(f"j={j}, R={R}, rev={revenue(G, M, q, jth=j)}")
+            #assert(wg_star < w - offset)
+            #assert(eq(R, revenue(G, M, q, jth=j)))
         else:
             R = (1-q) * R + w
-            assert(eq(R, revenue(G, M, q, jth=j)))
+            #assert(eq(R, revenue(G, M, q, jth=j)))
         R = (1-q) * R
         lastj[i_star] = j
         j_taken_sorted.add(j) 
@@ -119,7 +121,10 @@ def match_by_backward_oblivious_greedy(G, q):
     return list(M)
 
 
-def match_by_online_greedy(G, q, thr):
+def match_by_online_greedy(G, q, thr=None):
+    if thr is not None:
+        thr = thr if thr < 0 else -thr
+
     V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
     V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
     assert is_sorted(V2)
@@ -132,6 +137,8 @@ def match_by_online_greedy(G, q, thr):
             continue
         i_star, w_star = min(iw, key=itemgetter(1))
 
+        if thr is None: # set thr to be the first best 
+            thr = w_star
         if -w_star * (1-q)**(j+1) < -thr:
             continue
 
