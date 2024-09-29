@@ -7,6 +7,7 @@ from matches.algs import match_by_flow, \
                          match_by_forward_greedy, \
                          match_by_global_greedy, \
                          match_by_online_greedy, \
+                         match_by_backward_greedy, \
                          match_by_backward_oblivious_greedy, \
                          revenue, eq
 
@@ -95,8 +96,16 @@ def test_backward_oblivious_greedy(edges_end_big, edges_reassign):
     R = sum_of_weight(G, M)
     assert R == -100
 
+    M = match_by_backward_greedy(G, q)
+    R = sum_of_weight(G, M)
+    assert R == -100
+
     G = create_dibipartite(edges_reassign, q)
     M = match_by_backward_oblivious_greedy(G, q)
+    R = sum_of_weight(G, M)
+    assert R == -3 * 2 + -10
+
+    M = match_by_backward_greedy(G, q)
     R = sum_of_weight(G, M)
     assert R == -3 * 2 + -10
 

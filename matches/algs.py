@@ -31,7 +31,46 @@ def revenue(G, M, q, jth=-1):
 # Checcklist: negative weight, j starts from 0, remove asserts
 
 def match_by_backward_greedy(G, q):
-    pass
+    V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
+    V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
+    assert is_sorted(V2)
+
+    M = set()
+    R = 0
+    lastj = dict()
+    j_taken_sorted = SortedList()
+
+    for j in reversed(V2):
+
+        def gain(i, w):
+            if i in lastj:
+                nj_smaller = j_taken_sorted.bisect_left(lastj[i])
+                offset = -G.edges[i, lastj[i]]['weight'] * (1-q) ** (lastj[i] - j + 1 + nj_smaller)
+                return w - q * R - offset
+            else:
+                return w - q * R
+
+        iw = [(i, gain(i, -d['weight'])) for i, _, d in G.in_edges(nbunch=j, data=True)]
+        if len(iw) == 0:
+            continue
+        i_star, g_star = max(iw, key=itemgetter(1))
+
+        if g_star <= 0:
+            R = (1-q) * R
+            continue
+
+        M.add((i_star, j))
+        if i_star in lastj:
+            M.remove((i_star, lastj[i_star]))
+            j_taken_sorted.remove(lastj[i_star])
+        lastj[i_star] = j
+        j_taken_sorted.add(j) 
+
+        assert(eq(R + g_star, revenue(G, M, q, jth=j)))
+        R = (1-q) * (R + g_star)
+    
+    return list(M)
+
 
 
 def match_by_backward_oblivious_greedy(G, q):
