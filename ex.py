@@ -42,7 +42,7 @@ def main():
         n1 = int(items[1])
         n2 = int(items[2])
         p = float(items[3])
-        G = create_random_weighted_dibipartite(n1, n2, p)
+        G = create_random_weighted_dibipartite(n1, n2, args.q, p)
     else:
         raise Exception(f"dataset={args.dataset}")
 
@@ -70,6 +70,7 @@ def main():
         M = match_by_backward_oblivious_greedy(G, q)
 
     runtime = time.time() - start_time
+    print(f"M: {M}")
 
     ## Log
     log = dict()

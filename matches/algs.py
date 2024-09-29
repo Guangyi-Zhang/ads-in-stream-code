@@ -240,14 +240,36 @@ def match_by_flow(G, q):
 
     G.add_edge("t0", "t", weight=0, biased_w=0, capacity=h)
 
+    # have to try every demand, as the best may not be a max flow
+    Mbest, Rbest = [], 0
+    for h_ in range(1,h+1):
+        try:
+            G.nodes["s"]['demand'] = -h_
+            G.nodes["t"]['demand'] = h_
+            flowDict = nx.min_cost_flow(G, weight='biased_w')
+
+            M = []
+            A = [v for v, flow in flowDict['s'].items() if flow == 1]
+            for i in A:
+                j = [v for v, flow in flowDict[i].items() if flow == 1][0]
+                M.append((i,j))
+
+            #print(f"h_={h_}, R={revenue(G,M,q)}, M={M}")
+            R = revenue(G,M,q)
+            if R > Rbest:
+                Rbest = R
+                Mbest = M
+        except: # can't fulfill demand h_
+            pass
+
     #flowDict = nx.min_cost_flow(G)
-    flowDict = nx.max_flow_min_cost(G, 's', 't', weight='biased_w') # doesn't work with fractional weights
+    #flowDict = nx.max_flow_min_cost(G, 's', 't', weight='biased_w') # doesn't work with fractional weights
     # print(f"mincost = {nx.cost_of_flow(G, flowDict)}")
 
-    M = []
-    A = [v for v, flow in flowDict['s'].items() if flow == 1]
-    for i in A:
-        j = [v for v, flow in flowDict[i].items() if flow == 1][0]
-        M.append((i,j))
+    #M = []
+    #A = [v for v, flow in flowDict['s'].items() if flow == 1]
+    #for i in A:
+    #    j = [v for v, flow in flowDict[i].items() if flow == 1][0]
+    #    M.append((i,j))
 
-    return M
+    return Mbest

@@ -171,7 +171,7 @@ def test_mwm(edges_1vs2):
     assert R == -10
 
 
-def test_flow(edges_1vs2):
+def test_flow(edges_1vs2, edges_end_big):
     q = 0.1
     G = create_dibipartite(edges_1vs2, q)
     M = match_by_flow(G, q)
@@ -184,3 +184,8 @@ def test_flow(edges_1vs2):
     R = sum_of_weight(G, M)
     assert R == -3
 
+    q = 0.1
+    G = create_dibipartite(edges_end_big, q)
+    M = match_by_flow(G, q)
+    R = sum_of_weight(G, M)
+    assert R == -100
