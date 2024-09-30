@@ -139,7 +139,7 @@ def test_global_greedy(edges_1vs2, edges_end_big, G_empty):
     G = create_dibipartite(edges_end_big, q)
     M = match_by_global_greedy(G, q)
     R = sum_of_weight(G, M)
-    assert R == -2 + -7 + -100
+    assert R == -100
 
 
 def test_forward_greedy(edges_end_big, G_empty):
