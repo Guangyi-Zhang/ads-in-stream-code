@@ -3,9 +3,17 @@ import random
 import math
 
 
-def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C=1e5, directed=True):
+def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C=1e5, directed=True, typ=1):
     '''
     C is a scale factor to convert and truncate factional weights
+
+    typ:
+    - 0: a fully random bip
+    - 1: every ad has a single favorite slot with a large reward
+
+    Every edge has multi attributes:
+    - weight: a weight made negative, for compatibility with some optim algs
+    - biased_w: a position-biased weight, also negative
     '''
 
     # Create sets of nodes
@@ -18,11 +26,17 @@ def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C
     G.add_nodes_from(bottom_nodes, bipartite=0)
     
     # Add edges with random weights
-    for j in top_nodes:
-        for i in bottom_nodes:
+    for i in bottom_nodes:
+        jt = random.randint(0, n2-1)
+        for j in top_nodes:
             if random.random() < p:
-                #weight = random.uniform(*weight_range)
-                weight = random.randint(*weight_range)
+                if typ == 0:
+                    weight = random.uniform(*weight_range)
+                elif typ == 1:
+                    weight = weight_range[1] if j == jt else weight_range[0]
+                else:
+                    raise Exception(f"unknown type={typ}")
+
                 G.add_edge(i, j, weight=-weight, # negative weight!
                                  biased_w=-math.floor(weight * (1-q)**(j+1) * C), 
                                  capacity=1) 
