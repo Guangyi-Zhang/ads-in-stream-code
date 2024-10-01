@@ -39,15 +39,17 @@ def match_by_backward_greedy(G, q):
     M = set()
     R = 0
     lastj = dict()
-    j_taken_sorted = SortedList()
 
     for j in reversed(V2):
 
         def gain(i, w):
             if i in lastj:
-                nj_smaller = j_taken_sorted.bisect_left(lastj[i])
-                offset = -G.edges[i, lastj[i]]['weight'] * (1-q) ** (lastj[i] - j + 1 + nj_smaller)
-                return w - q * R - offset
+                M.remove((i, lastj[i]))
+                M.add((i,j))
+                Ri = revenue(G, M, q, jth=j) / (1-q)
+                M.add((i, lastj[i]))
+                M.remove((i,j))
+                return Ri - R
             else:
                 return w - q * R
 
@@ -63,9 +65,7 @@ def match_by_backward_greedy(G, q):
         M.add((i_star, j))
         if i_star in lastj:
             M.remove((i_star, lastj[i_star]))
-            j_taken_sorted.remove(lastj[i_star])
         lastj[i_star] = j
-        j_taken_sorted.add(j) 
 
         #print(f"j={j}, R={R + g_star}, rev={revenue(G, M, q, jth=j)}")
         #assert(eq(R + g_star, revenue(G, M, q, jth=j)))
@@ -74,17 +74,28 @@ def match_by_backward_greedy(G, q):
     return list(M)
 
 
-
 def match_by_backward_oblivious_greedy(G, q):
     V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
     V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
     assert is_sorted(V2)
 
+    def update_lastgain(lastgain, M):
+        R = 0
+        jlast = len(V2) - 1
+        for i,j in reversed(sorted(M, key=itemgetter(1))): # sorted by j
+            if jlast > j:
+                R = R * (1-q) ** (jlast - j)
+            w = -G.edges[i,j]['weight']
+            lastgain[i] = w - q * R
+            R = (1-q) * R + w 
+            jlast = j
+
+        return R # missing one (1-q) before the first ad
+
     M = set()
     R = 0
     lastgain = defaultdict(float)
     lastj = dict()
-    j_taken_sorted = SortedList()
 
     for j in reversed(V2):
         diffj = lambda i: (1-q) ** (lastj[i]-j if i in lastj else 0)
@@ -99,24 +110,19 @@ def match_by_backward_oblivious_greedy(G, q):
 
         w = -G.edges[i_star, j]['weight']
         M.add((i_star, j))
-        lastgain[i_star] = w - q * R
-        if i_star in lastj:
+
+        if i_star in lastj: # re-assign
             M.remove((i_star, lastj[i_star]))
-
-            nj_smaller = j_taken_sorted.bisect_left(lastj[i_star])
-            j_taken_sorted.remove(lastj[i_star])
-
-            offset = -G.edges[i_star, lastj[i_star]]['weight'] * (1-q) ** (lastj[i_star] - j + 1 + nj_smaller)
-            R = (1-q) * R + w - offset
+            R = update_lastgain(lastgain, M)
             #print(f"j={j}, R={R}, rev={revenue(G, M, q, jth=j)}")
             #assert(wg_star < w - offset)
-            #assert(eq(R, revenue(G, M, q, jth=j)))
-        else:
+            assert(eq(R, revenue(G, M, q, jth=j)))
+        else: # assign i_star for the first time
             R = (1-q) * R + w
-            #assert(eq(R, revenue(G, M, q, jth=j)))
+            lastgain[i_star] = w - q * R
+            assert(eq(R, revenue(G, M, q, jth=j)))
         R = (1-q) * R
         lastj[i_star] = j
-        j_taken_sorted.add(j) 
     
     return list(M)
 
