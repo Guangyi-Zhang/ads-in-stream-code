@@ -157,7 +157,7 @@ def match_by_online_greedy(G, q, thr=None):
 def match_by_global_greedy(G, q):
     h = []
     for i, j, d in G.edges(data=True):
-        heappush(h, (d['biased_w'], (i,j,0)))
+        heappush(h, (d['weight'] * (1-q)**(j+1), (i,j,0)))
 
     M = []
     i_taken = set()
