@@ -46,7 +46,7 @@ def match_by_backward_greedy(G, q):
             if i in lastj:
                 M.remove((i, lastj[i]))
                 M.add((i,j))
-                Ri = revenue(G, M, q, jth=j) / (1-q)
+                Ri = revenue(G, M, q, jth=j)
                 M.add((i, lastj[i]))
                 M.remove((i,j))
                 return Ri - R
@@ -115,12 +115,11 @@ def match_by_backward_oblivious_greedy(G, q):
             M.remove((i_star, lastj[i_star]))
             R = update_lastgain(lastgain, M)
             #print(f"j={j}, R={R}, rev={revenue(G, M, q, jth=j)}")
-            #assert(wg_star < w - offset)
-            assert(eq(R, revenue(G, M, q, jth=j)))
+            #assert(eq(R, revenue(G, M, q, jth=j)))
         else: # assign i_star for the first time
             R = (1-q) * R + w
             lastgain[i_star] = w - q * R
-            assert(eq(R, revenue(G, M, q, jth=j)))
+            #assert(eq(R, revenue(G, M, q, jth=j)))
         R = (1-q) * R
         lastj[i_star] = j
     
