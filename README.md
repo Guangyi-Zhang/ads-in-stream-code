@@ -16,7 +16,7 @@ from matches.algs import match_by_flow, \
                          match_by_global_greedy, \
                          match_by_online_greedy, \
                          match_by_backward_greedy, \
-                         match_by_backward_oblivious_greedy, \
+                         match_by_backward_greedy_proxy, \
                          match_by_mwm, \
                          revenue
 from matches.bip import create_dibipartite
@@ -37,7 +37,7 @@ edges_with_w = [
 q = 0.1
 G = create_dibipartite(edges_with_w, q)
 
-M = match_by_backward_oblivious_greedy(G, q)
+M = match_by_backward_greedy_proxy(G, q)
 print(revenue(G, M, q))
 print(M)
 ```

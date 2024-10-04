@@ -74,7 +74,7 @@ def match_by_backward_greedy(G, q):
     return list(M)
 
 
-def match_by_backward_oblivious_greedy(G, q):
+def match_by_backward_greedy_proxy(G, q):
     V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
     V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
     assert is_sorted(V2)

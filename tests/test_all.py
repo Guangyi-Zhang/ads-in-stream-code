@@ -9,7 +9,7 @@ from matches.algs import match_by_flow, \
                          match_by_global_greedy, \
                          match_by_online_greedy, \
                          match_by_backward_greedy, \
-                         match_by_backward_oblivious_greedy, \
+                         match_by_backward_greedy_proxy, \
                          match_by_mwm, \
                          revenue, eq
 
@@ -90,11 +90,11 @@ def test_revenue(edges_1vs2):
     assert eq(revenue(G, M, q), 2*0.9 + 2*0.9**3)
 
 
-def test_backward_oblivious_greedy(edges_end_big, edges_reassign):
+def test_backward_greedy(edges_end_big, edges_reassign):
     q = 0.1
 
     G = create_dibipartite(edges_end_big, q)
-    M = match_by_backward_oblivious_greedy(G, q)
+    M = match_by_backward_greedy_proxy(G, q)
     R = sum_of_weight(G, M)
     assert R == -100
 
@@ -103,7 +103,7 @@ def test_backward_oblivious_greedy(edges_end_big, edges_reassign):
     assert R == -100
 
     G = create_dibipartite(edges_reassign, q)
-    M = match_by_backward_oblivious_greedy(G, q)
+    M = match_by_backward_greedy_proxy(G, q)
     R = sum_of_weight(G, M)
     assert R == -3 * 2 + -10
 
