@@ -6,11 +6,12 @@ import time
 
 from matches.bip import create_random_weighted_dibipartite
 from matches.algs import match_by_flow, \
+                         match_by_flow_plus_greedy, \
                          match_by_forward_greedy, \
                          match_by_global_greedy, \
                          match_by_online_greedy, \
                          match_by_backward_greedy, \
-                         match_by_backward_oblivious_greedy, \
+                         match_by_backward_greedy_proxy, \
                          match_by_mwm, \
                          revenue
 
@@ -57,6 +58,8 @@ def main():
     q = args.q
     if m == "flow":
         M = match_by_flow(G, q)
+    if m == "flowgreedy":
+        M = match_by_flow_plus_greedy(G, q)
     elif m == "mwm":
         M = match_by_mwm(G)
     elif m == "forwardgreedy":
@@ -67,8 +70,8 @@ def main():
         M = match_by_online_greedy(G, q, thr=args.thr)
     elif m == "backwardgreedy":
         M = match_by_backward_greedy(G, q)
-    elif m == "obliviousgreedy":
-        M = match_by_backward_oblivious_greedy(G, q)
+    elif m == "backwardgreedyproxy":
+        M = match_by_backward_greedy_proxy(G, q)
 
     runtime = time.time() - start_time
     #print(f"M: {M}")

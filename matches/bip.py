@@ -9,7 +9,9 @@ def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C
 
     typ:
     - 0: a fully random bip
-    - 1: every ad has a single favorite slot with a large reward
+    - 1: every ad has a large reward for a single favorite slot, and small rewards for the rest
+    - 2: larger rewards for early slots
+    - 3: larger rewards for later slots
 
     Every edge has multi attributes:
     - weight: a weight made negative, for compatibility with some optim algs
@@ -27,13 +29,17 @@ def create_random_weighted_dibipartite(n1, n2, q, p=1.0, weight_range=(1, 10), C
     
     # Add edges with random weights
     for i in bottom_nodes:
-        jt = random.randint(0, n2-1)
+        jt = random.randint(0, n2-1) # targeted slot
         for j in top_nodes:
             if random.random() < p:
                 if typ == 0:
                     weight = random.uniform(*weight_range)
                 elif typ == 1:
                     weight = weight_range[1] if j == jt else weight_range[0]
+                elif typ == 2:
+                    weight = random.uniform(*weight_range) * (n2-j) / n2
+                elif typ == 3:
+                    weight = random.uniform(*weight_range) * (j / n2)
                 else:
                     raise Exception(f"unknown type={typ}")
 
