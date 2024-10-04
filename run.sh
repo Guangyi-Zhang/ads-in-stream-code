@@ -6,6 +6,7 @@ ver=1 # @20240929
 ver=2 # @20240930
 ver=3 # @20241004: typ=0,1,2,3
 ver=4 # @20241004: +flowgreedy
+ver=5 # @20241004: bug in mwm
 
 rep=3
 seed=$(date +%s)

@@ -209,7 +209,7 @@ def match_by_mwm(G):
     nx.bipartite.minimum_weight_full_matching and linear_sum_assignment in scipy do not work.
     use a general matching instead.
     '''
-    edges = [(i,j,-d['weight']) for i,j,d in G.edges(data=True)]
+    edges = [(i,j,-d['biased_w']) for i,j,d in G.edges(data=True)]
     G_ = nx.Graph()
     G_.add_weighted_edges_from(edges) # remake a graph with non-neg weights
 
