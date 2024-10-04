@@ -4,6 +4,7 @@ import networkx as nx
 from matches.bip import create_dibipartite, \
                         create_random_weighted_dibipartite
 from matches.algs import match_by_flow, \
+                         match_by_flow_plus_greedy, \
                          match_by_forward_greedy, \
                          match_by_global_greedy, \
                          match_by_online_greedy, \
@@ -189,3 +190,16 @@ def test_flow(edges_1vs2, edges_end_big):
     M = match_by_flow(G, q)
     R = sum_of_weight(G, M)
     assert R == -100
+
+    edges_with_w = [
+        (2, 0, 2),
+        (3, 1, 2),
+    ]
+    q = 0.3 # so h=1
+    G = create_dibipartite(edges_with_w, q)
+    M = match_by_flow(G, q)
+    R = sum_of_weight(G, M)
+    assert R == -2
+    M = match_by_flow_plus_greedy(G, q)
+    R = sum_of_weight(G, M)
+    assert R == -4

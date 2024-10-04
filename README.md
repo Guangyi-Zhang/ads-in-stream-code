@@ -12,6 +12,7 @@ All algorithms can be found in `matches/algs.py`.
 ```python
 from matches.algs import match_by_flow, \
                          match_by_forward_greedy, \
+                         match_by_flow_plus_greedy, \
                          match_by_global_greedy, \
                          match_by_online_greedy, \
                          match_by_backward_greedy, \
@@ -77,7 +78,8 @@ bash run.sh
 
 To run tests, run
 ```
-py.test
+py.test -vv -s
+# py.test -vv -s -k 'test_case_name'
 ```
 
 ## Datasets

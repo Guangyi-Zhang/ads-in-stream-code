@@ -153,14 +153,18 @@ def match_by_online_greedy(G, q, thr=None):
     return M
 
 
-def match_by_global_greedy(G, q):
+def match_by_global_greedy(G, q, M=None):
     h = []
     for i, j, d in G.edges(data=True):
         heappush(h, (d['weight'] * (1-q)**(j+1), (i,j,0)))
 
-    M = []
-    i_taken = set()
-    j_taken = set()
+    if M is None:
+        M = []
+        i_taken = set()
+        j_taken = set()
+    else:
+        i_taken = set([i for i,j in M])
+        j_taken = set([j for i,j in M])
 
     # update edge weights in a lazy greedy fashion
     while(len(h) > 0):
@@ -277,3 +281,9 @@ def match_by_flow(G, q):
     #    M.append((i,j))
 
     return Mbest
+
+
+def match_by_flow_plus_greedy(G, q):
+    M = match_by_flow(G, q)
+    M = match_by_global_greedy(G, q, M)
+    return M
