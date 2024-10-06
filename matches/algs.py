@@ -28,6 +28,17 @@ def revenue(G, M, q, jth=-1):
     return R
 
 
+def match_less(G, M, q, k):
+    M = set(M)
+    while len(M) > k:
+        R = revenue(G, M, q)
+        losses = [(R - revenue(G, M.difference({(i,j)}), q), (i,j)) for i,j in M]
+        loss, e = min(losses, key=itemgetter(0))
+        M.remove(e)
+
+    return list(M)
+
+
 ##### Algorithms #####
 # Checcklist: negative weight, j starts from 0, remove asserts
 
@@ -153,7 +164,7 @@ def match_by_online_greedy(G, q, thr=None):
     return M
 
 
-def match_by_global_greedy(G, q, M=None):
+def match_by_global_greedy(G, q, M=None, k=None):
     h = []
     for i, j, d in G.edges(data=True):
         heappush(h, (d['weight'] * (1-q)**(j+1), (i,j,0)))
@@ -167,7 +178,9 @@ def match_by_global_greedy(G, q, M=None):
         j_taken = set([j for i,j in M])
 
     # update edge weights in a lazy greedy fashion
-    while(len(h) > 0):
+    if k is None:
+        k = len(h) # an UB of the matching size limit
+    while(len(h) > 0 and len(M) < k):
         w, (i, j, nj) = heappop(h)
 
         if j in j_taken or i in i_taken:
@@ -186,7 +199,7 @@ def match_by_global_greedy(G, q, M=None):
     return M
 
 
-def match_by_forward_greedy(G):
+def match_by_forward_greedy(G, k=None):
     V1 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 0]
     V2 = [n for n, d in G.nodes(data=True) if d["bipartite"] == 1]
     assert is_sorted(V2)
@@ -194,6 +207,9 @@ def match_by_forward_greedy(G):
     M = []
     i_taken = set()
     for j in V2:
+        if k is not None and len(M) > k:
+            break
+
         iw = [(i, d['weight']) for i, _, d in G.in_edges(nbunch=j, data=True) if i not in i_taken]
         if len(iw) == 0:
             continue
@@ -227,8 +243,10 @@ def match_by_mwm(G):
     return M
 
 
-def match_by_flow(G, q):
+def match_by_flow(G, q, k=None):
     h = math.floor(np.log(0.5) / np.log(1-q))
+    if k is not None:
+        h = k
 
     G = G.copy() # as we need to modify G
 

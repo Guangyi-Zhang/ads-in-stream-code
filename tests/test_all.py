@@ -11,6 +11,7 @@ from matches.algs import match_by_flow, \
                          match_by_backward_greedy, \
                          match_by_backward_greedy_proxy, \
                          match_by_mwm, \
+                         match_less, \
                          revenue, eq
 
 
@@ -71,6 +72,22 @@ def edges_reassign():
     ]
 
     return edges_with_w
+
+
+def test_match_less():
+    q = 0.1
+    edges_with_w = [
+        (2, 0, 1),
+        (3, 1, 10),
+    ]
+    M = [
+        (2, 0),
+        (3, 1),
+    ]
+    G = create_dibipartite(edges_with_w, q)
+    M2 = match_less(G, M, q, 1)
+
+    assert M2 == [(3,1)]
 
 
 def test_revenue(edges_1vs2):
