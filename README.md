@@ -10,42 +10,33 @@ pip install numpy networkx pytest sortedcontainers
 All algorithms can be found in `matches/algs.py`.
 
 ```python
-from matches.algs import match_by_flow, \
-                         match_by_forward_greedy, \
-                         match_by_flow_plus_greedy, \
-                         match_by_global_greedy, \
-                         match_by_online_greedy, \
-                         match_by_backward_greedy, \
-                         match_by_backward_greedy_proxy, \
-                         match_by_mwm, \
-                         revenue
-from matches.bip import create_dibipartite
-
-
-'''
-we require the node indexs of a bipartite start with 0, and 
-index the slots side first.
-E.g., given 2 slots `{j}` and 2 ads `{i}`, 
-their indexs are `j=0,1` and `i=2,3`.
-'''
-edges_with_w = [ 
-    (2, 0, 2), # (ad, slot, weight)
-    (3, 1, 2),
-    (2, 1, 3),
-]
-
-q = 0.1
-G = create_dibipartite(edges_with_w, q)
-
-M = match_by_backward_greedy_proxy(G, q)
-print(revenue(G, M, q))
-print(M)
-```
-
-The above exmaple returns
-```
+>>> from matches.algs import match_by_flow, \
+...                          match_by_forward_greedy, \
+...                          match_by_flow_plus_greedy, \
+...                          match_by_global_greedy, \
+...                          match_by_online_greedy, \
+...                          match_by_backward_greedy, \
+...                          match_by_backward_greedy_proxy, \
+...                          match_by_mwm, \
+...                          revenue
+>>> from matches.bip import create_dibipartite
+>>> 
+>>> # We require the node indexs of a bipartite start with 0, and index the slots side first.
+>>> # E.g., given 2 slots `{j}` and 2 ads `{i}`, their indexs are `j=0,1` and `i=2,3`.
+>>> edges_with_w = [ 
+...     (2, 0, 2), # (ad, slot, weight)
+...     (3, 1, 2),
+...     (2, 1, 3),
+... ]
+>>> q = 0.1
+>>> G = create_dibipartite(edges_with_w, q)
+>>> 
+>>> M = match_by_backward_greedy_proxy(G, q)
+>>> print(revenue(G, M, q))
 2.43
+>>> print(M)
 [(2, 1)]
+>>> 
 ```
 
 ## Implementation details
@@ -78,7 +69,7 @@ bash run.sh
 
 To run tests, run
 ```
-py.test -vv -s
+py.test -vv -s --doctest-glob="README.md"
 # py.test -vv -s -k 'test_case_name'
 ```
 
