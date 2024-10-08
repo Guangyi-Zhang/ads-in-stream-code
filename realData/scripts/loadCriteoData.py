@@ -30,14 +30,14 @@ if mode == 1: # clusterize ads with k-means and save file
     rewards = []
     clicks = 0
     totAdsDisplayed = 0
+    # load data, first column denotes if ad was clicked or no
+    # load data, columns from 1 to LENVALUES contain some click information on the ad rewards
+    # load data, columns from LENVALUES+1 to the end contain categorical features of the ads (attributes)
     for i,line in enumerate(file):
         ch = line.strip().split('\t')
         currkey = ""
         if ch[0] == '1':
             clicks += 1
-        #for el in ch[14:]:
-        #    currkey = currkey + el + "+"
-        #vectors.append(currkey)
         reward = max(sum([int(num) if num != '' else 0 for num in ch[1:LENVALUES+1]]), 0) # reward is sum over numerical counts (we do not know exact meaning)
         attributes = [int(att, 16) if att != '' else np.nan for att in ch[LENVALUES+2:]] # vector encoding attributes
         if(len(attributes) != LENATTRS):
@@ -45,33 +45,26 @@ if mode == 1: # clusterize ads with k-means and save file
             for _ in range(missing):
                 attributes.append(np.nan)
         currvec = np.array(attributes)
-            #print("Len is", attributes.shape[0], len(ch[LENVALUES+2:]))
         vectors.append(currvec)
         rewards.append(reward)
-        #print(len(attributes))
-        #if(len(ch)< 40):
-        #    print(ch[0], ch[1:14], ch[15:], line)
-        #print(reward, attributes)
-        #print(ch[14:])
         totAdsDisplayed += 1
-        #if i > 100000:
-        #    break
-#print(vectors)
     print("clicks", clicks)
     print("ads displayed", totAdsDisplayed)
 
+    # X is the matrix containing the ads, lets drop missing values
     X = np.array(vectors)
     print(X[0])
     print(X.shape[0], X.shape[1])
     missingVals = ~np.isfinite(X) # get nan values bool
-    avgColumn = np.nanmean(X, 0) # compute mean ignoring 
+    avgColumn = np.nanmean(X, 0) # compute mean -- used only for the rewards 
     X_no_miss = np.where(missingVals, avgColumn, X)
     print(X_no_miss[0])
 
-# There may be some columns with only nan value, remove them
+    # There may be some columns with only nan value, remove them
     X_no_miss_no_nan = X_no_miss[:,~np.all(np.isnan(X_no_miss), axis=0)] 
     print(X_no_miss_no_nan[0])
     tot_clusters = 100
+    # k-means over attributes
     kmeans = KMeans(n_clusters=tot_clusters, random_state=200, n_init=1).fit(X_no_miss_no_nan)
     assignment = kmeans.labels_
     assignment_list = assignment.tolist()
@@ -79,6 +72,7 @@ if mode == 1: # clusterize ads with k-means and save file
     clickRate = clicks/(1.*totAdsDisplayed)
     jsonfilename = fileClusters
 
+    # store intermediate data, i.e., for each ad we have the cluster it belongs to
     dict_data = {
             "dataset":"criteo-ads-clust", 
             "totAdsCategories":tot_clusters, 
@@ -89,6 +83,7 @@ if mode == 1: # clusterize ads with k-means and save file
     exit(0)
 
 elif mode == 2: # load clusters and stream of ads and generate bipartite graph
+    # load data generated from mode == 1
     k, clusts = loadClustering(fileClusters)
     file = open(f, 'r')
     rewards = []
@@ -107,11 +102,16 @@ elif mode == 2: # load clusters and stream of ads and generate bipartite graph
     print("ads displayed", totAdsDisplayed)
 
     clickRate = clicks/(1.*totAdsDisplayed)
+    # ads are recorded over one day: we can imagine a user browsing some platform and 
+    # we create a slot S_i after each minute of browsing -> total of 1440 slots
     time_granularity = 1440 # Display one add every 1 one minute over one day
-    totAds =  time_granularity * k
+    # we create a slot S_i after each minute of browsing -> total of 1440 slots
+
+    tot_advertisers = time_granularity # for now easy version: each add category can appear in each slot S_i, TODO: play with this parameter
+    totAds = tot_advertisers * k
     step = math.floor(totAdsDisplayed/time_granularity)
     edges = [] #(ad, slot, weight)
-    current_slot = [0 for _ in range(k)]
+    current_slot = [0 for _ in range(k)] # sum of rewards for each add category, used to assign average reward for slot S_i
     s_idx = 0
     ADSID = 0
     SLOTSID = totAds
@@ -119,9 +119,9 @@ elif mode == 2: # load clusters and stream of ads and generate bipartite graph
     for idx, ad in enumerate(clusts):
         my_pos = min(math.floor(idx/(1.*step)), time_granularity) # keeping bucket position, not used as index!
         if my_pos > s_idx: # Changing time-slot
-            curr_w = [el/ads_current_slot for el in current_slot]
+            curr_w = [el/ads_current_slot for el in current_slot] # finalising average reward per ad category
             for w in curr_w:
-                edges.append([ADSID, SLOTSID, w])
+                edges.append([ADSID, SLOTSID, w]) # add edges of the bipartite graph
                 ADSID += 1
             current_slot = [0 for _ in range(k)] # init empty weights
             s_idx = my_pos # update last slot position
@@ -142,9 +142,3 @@ elif mode == 2: # load clusters and stream of ads and generate bipartite graph
         }
 
     dumpJson(dict_data, jsonfilename)
-
-'''
-print(len(vectors))
-myvect_set =  set(vectors)
-print(len(myvect_set))
-'''
