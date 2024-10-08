@@ -14,6 +14,7 @@ from matches.algs import match_by_flow, \
                          match_by_backward_greedy, \
                          match_by_backward_greedy_proxy, \
                          match_by_mwm, \
+                         match_less, \
                          revenue
 
 dictFiles = {"criteo": "realData/criteo-ads-bip.json", "yt":"realData/youtube-ads3.json"}
@@ -36,6 +37,7 @@ def main():
     parser.add_argument('-m', '--method')
     parser.add_argument('-d', '--dataset')
     parser.add_argument('-q', '--q', type=float)
+    parser.add_argument('-k', '--k', type=int)
     parser.add_argument('--thr', type=float) # only for onlinegreedy
     #parser.add_argument('-m', '--method', action='store_true')
     args = parser.parse_args()
@@ -68,22 +70,26 @@ def main():
 
     m = args.method
     q = args.q
+    k = args.k
     if m == "flow":
-        M = match_by_flow(G, q)
+        M = match_by_flow(G, q, k=k)
     if m == "flowgreedy":
         M = match_by_flow_plus_greedy(G, q)
     elif m == "mwm":
         M = match_by_mwm(G)
     elif m == "forwardgreedy":
-        M = match_by_forward_greedy(G)
+        M = match_by_forward_greedy(G, k=k)
     elif m == "greedy":
-        M = match_by_global_greedy(G, q)
+        M = match_by_global_greedy(G, q, k=k)
     elif m == "onlinegreedy":
         M = match_by_online_greedy(G, q, thr=args.thr)
     elif m == "backwardgreedy":
         M = match_by_backward_greedy(G, q)
     elif m == "backwardgreedyproxy":
         M = match_by_backward_greedy_proxy(G, q)
+
+    if k is not None:
+        M = match_less(G, M, q, k)
 
     runtime = time.time() - start_time
     #print(f"M: {M}")
@@ -98,6 +104,7 @@ def main():
 
     log['q'] = args.q
     if not real:
+        log['k'] = args.k
         log['thr'] = args.thr
         log['n1'] = n1
         log['n2'] = n2
