@@ -5,6 +5,7 @@ import logging
 import time
 
 from matches.bip import create_random_weighted_dibipartite
+from matches.bip import loadAdsData
 from matches.algs import match_by_flow, \
                          match_by_flow_plus_greedy, \
                          match_by_forward_greedy, \
@@ -15,13 +16,17 @@ from matches.algs import match_by_flow, \
                          match_by_mwm, \
                          revenue
 
+dictFiles = {"criteo": "realData/criteo-ads-bip.json", "yt":"realData/youtube-ads3.json"}
+typFiles = {"criteo": 2, "yt":1}
 
 def main():
+    '''
     logging.basicConfig(
         filename='logs/mylog.txt',
         format='[%(asctime)s] [%(levelname)-8s] %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
+    '''
 
     ## Parameters
     parser = argparse.ArgumentParser()
@@ -38,6 +43,7 @@ def main():
     random.seed(args.seed)
 
     ## Data
+    real = False
     if args.dataset.startswith("randombip"):
         items = args.dataset.split('-') # randombip-n1-n2-p
         n1 = int(items[1])
@@ -45,6 +51,12 @@ def main():
         p = float(items[3])
         typ = float(items[4]) if len(items) > 4 else 0
         G = create_random_weighted_dibipartite(n1, n2, args.q, p, typ=typ)
+    elif args.dataset.startswith("realData"):
+        items = args.dataset.split('-') # randombip-n1-n2-p
+        fileName = dictFiles[items[1]]
+        print(fileName)
+        real = True
+        G = loadAdsData(fileName, 0.2, p=1.0, directed=True)
     else:
         raise Exception(f"dataset={args.dataset}")
 
@@ -85,10 +97,11 @@ def main():
     log['dataset'] = args.dataset
 
     log['q'] = args.q
-    log['thr'] = args.thr
-    log['n1'] = n1
-    log['n2'] = n2
-    log['nE'] = G.number_of_edges()
+    if not real:
+        log['thr'] = args.thr
+        log['n1'] = n1
+        log['n2'] = n2
+        log['nE'] = G.number_of_edges()
 
     log['runtime'] = runtime
     log['R'] = revenue(G, M, q)
