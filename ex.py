@@ -17,17 +17,18 @@ from matches.algs import match_by_flow, \
                          match_less, \
                          revenue
 
-dictFiles = {"criteo": "realData/criteo-ads-bip.json", "yt":"realData/youtube-ads3.json"}
-typFiles = {"criteo": 2, "yt":1}
 
-def main():
-    '''
-    logging.basicConfig(
-        filename='logs/mylog.txt',
-        format='[%(asctime)s] [%(levelname)-8s] %(message)s',
-        level=logging.INFO,
-        datefmt='%Y-%m-%d %H:%M:%S')
-    '''
+dictFiles = {"criteo": "realData/criteo-ads-bip.json", "yt":"realData/youtube-ads3.json"}
+typFiles = {"criteo": 2, "yt":1} # TODO
+
+
+def main(use_logfile=False):
+    if use_logfile:
+        logging.basicConfig(
+            filename='logs/mylog.txt',
+            format='[%(asctime)s] [%(levelname)-8s] %(message)s',
+            level=logging.INFO,
+            datefmt='%Y-%m-%d %H:%M:%S')
 
     ## Parameters
     parser = argparse.ArgumentParser()
@@ -54,7 +55,7 @@ def main():
         typ = float(items[4]) if len(items) > 4 else 0
         G = create_random_weighted_dibipartite(n1, n2, args.q, p, typ=typ)
     elif args.dataset.startswith("realData"):
-        items = args.dataset.split('-') # randombip-n1-n2-p
+        items = args.dataset.split('-') # realData-source
         fileName = dictFiles[items[1]]
         print(fileName)
         real = True
@@ -103,12 +104,11 @@ def main():
     log['dataset'] = args.dataset
 
     log['q'] = args.q
-    if not real:
-        log['k'] = args.k
-        log['thr'] = args.thr
-        log['n1'] = n1
-        log['n2'] = n2
-        log['nE'] = G.number_of_edges()
+    log['k'] = args.k
+    log['thr'] = args.thr
+    log['n1'] = len([n for n, d in G.nodes(data=True) if d["bipartite"] == 0])
+    log['n2'] = len([n for n, d in G.nodes(data=True) if d["bipartite"] == 1])
+    log['nE'] = G.number_of_edges()
 
     log['runtime'] = runtime
     log['R'] = revenue(G, M, q)
@@ -120,4 +120,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(use_logfile=True)
