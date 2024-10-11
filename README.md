@@ -1,4 +1,4 @@
-# ads-in-stream-code
+# Code for native ad allocation in content feeds
 
 Prerequisites:
 ```
