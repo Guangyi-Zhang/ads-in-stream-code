@@ -18,9 +18,15 @@ from matches.algs import match_by_flow, \
                          revenue
 
 
-dictFiles = {"criteo": "realData/criteo-ads-bip.json", "yt":"realData/youtube-ads3.json"}
+dictFiles = {"criteo": "realData/criteo-ads-bip2.json", "yt":"realData/youtube-ads3.json"}
 typFiles = {"criteo": 2, "yt":1} # TODO
 
+def get_weights(G,M):
+    weights = []
+    for i,j in M: # sorted by j
+        weights.append(-G.edges[i,j]['weight'])
+    
+    return weights
 
 def main(use_logfile=False):
     if use_logfile:
@@ -93,7 +99,9 @@ def main(use_logfile=False):
         M = match_less(G, M, q, k)
 
     runtime = time.time() - start_time
+    wedges = get_weights(G,M)
     #print(f"M: {M}")
+    #print(f"W: {wedges}")
 
     ## Log
     log = dict()
@@ -109,6 +117,8 @@ def main(use_logfile=False):
     log['n1'] = len([n for n, d in G.nodes(data=True) if d["bipartite"] == 0])
     log['n2'] = len([n for n, d in G.nodes(data=True) if d["bipartite"] == 1])
     log['nE'] = G.number_of_edges()
+    log['matching'] = M
+    log['weights'] = wedges
 
     log['runtime'] = runtime
     log['R'] = revenue(G, M, q)

@@ -12,7 +12,8 @@ seed=$(date +%s)
 
 q=0.1
 
-for data in criteo yt; do
+for data in criteo; do
+#for data in yt; do
     for method in "flow" "flowgreedy" "mwm" "forwardgreedy" "greedy" "onlinegreedy" "backwardgreedy" "backwardgreedyproxy"; do
         python ex.py -v $ver -r $rep -s $seed -m $method -q $q -d "realData-$data" 
         #nohup ./build/main/Main -b $buildtype -v $ver -r $rep -s $seed -d random_graph_wTrue_nghb10_n${n}.csv -k 10 -t "note" -m $method  &
