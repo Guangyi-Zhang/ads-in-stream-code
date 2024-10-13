@@ -8,6 +8,9 @@ nohup.out
 
 *.log
 logdata*
+logs/
 
+pics/
+notebooks/
 datasets/
 tmp/
